@@ -1,12 +1,73 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Page title</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Car Workshop and Repair Services</title>
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+    }
+
+    header {
+        padding: 12px;
+        text-align: center;
+    }
+
+    header h1 {
+        margin: 0;
+    }
+
+    .services {
+        display: flex;
+        flex-wrap: wrap;
+        border-top: 3px solid #222;
+        border-bottom: 3px solid #222;
+    }
+
+    .service {
+        flex: 1 1 140px;
+        box-sizing: border-box;
+        min-height: 48px;
+        padding: 14px 10px;
+        border-right: 3px solid #222;
+        text-align: center;
+    }
+
+    .service:first-child {
+        border-left: 3px solid #222;
+    }
+
+    .workshop {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 32px;
+        padding: 16px;
+    }
+
+    .workshop-logo {
+        width: 200px;
+        height: 250px;
+        object-fit: contain;
+    }
+</style>
 </head>
 <body>
-<h1 style="text-align: center;"> Car Workshop and repair services </h1>
-<p>Welcome to the website</p>
-<p><img src="kaulogo.png" width="200" height="250"></p>
-<p>This will take you to blackboard <a href="https://lms.kau.edu.sa/">Blackboard</a></p>
+<header>
+    <h1>Car Workshop and Repair Services</h1>
+</header>
+<nav class="services" aria-label="Workshop services">
+    <div class="service">Service name 1</div>
+    <div class="service">Service name 2</div>
+    <div class="service">Service name 3</div>
+    <div class="service">Service name 4</div>
+    <div class="service">Service name 5</div>
+    <div class="service">Service name 6</div>
+</nav>
+<main class="workshop">
+    <img class="workshop-logo" src="kaulogo.png" alt="Workshop logo">
+</main>
 </body>
 </html>
