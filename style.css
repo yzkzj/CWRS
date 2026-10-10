@@ -72,3 +72,43 @@ header h1 {
     height: 250px;
     object-fit: contain;
 }
+
+/* ===== Responsive additions only (desktop look is unchanged) ===== */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    overflow-x: hidden;
+}
+
+header h1 {
+    overflow-wrap: break-word;
+}
+
+/* Tablets and phones: only scale the logo so it never covers the content */
+@media (max-width: 768px) {
+    .workshop-logo {
+        width: 120px;
+        height: 150px;
+    }
+}
+
+@media (max-width: 480px) {
+    header h1 {
+        font-size: 1.4rem;
+    }
+
+    .service {
+        flex: 1 1 45%;
+    }
+
+    .workshop-logo {
+        width: 80px;
+        height: 100px;
+        right: 8px;
+        bottom: 8px;
+    }
+}
