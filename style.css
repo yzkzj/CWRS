@@ -1,6 +1,30 @@
 body {
     margin: 0;
+    min-height: 100vh;
     font-family: Arial, sans-serif;
+    background-color: #f2f7fd;
+    background-image:
+        radial-gradient(circle at 20% 20%, rgba(30,110,220,.30), transparent 40%),
+        radial-gradient(circle at 80% 30%, rgba(90,170,240,.28), transparent 40%),
+        radial-gradient(circle at 60% 85%, rgba(70,90,210,.22), transparent 40%),
+        linear-gradient(#f2f7fd, #f2f7fd);
+    background-size: 140% 140%;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    animation: drift 20s ease-in-out infinite alternate;
+}
+
+@keyframes drift {
+    from { background-position: 0% 0%, 100% 0%, 50% 100%, 0 0; }
+    to   { background-position: 100% 60%, 0% 80%, 40% 0%, 0 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body { animation: none; }
+}
+
+nav {
+    background: #ffffff;
 }
 
 header {
