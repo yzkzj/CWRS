@@ -34,20 +34,24 @@ header {
 
 header h1 {
     margin: 0;
+    font-size: clamp(1.1rem, 4vw, 2rem);
 }
 
 .services {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     border-top: 3px solid #222;
     border-bottom: 3px solid #222;
 }
 
 .service {
-    flex: 1 1 140px;
+    flex: 1 1 0;
+    min-width: 0;
     box-sizing: border-box;
     min-height: 48px;
-    padding: 14px 10px;
+    padding: clamp(8px, 1.5vw, 14px) clamp(2px, 1vw, 10px);
+    font-size: clamp(0.6rem, 1.6vw, 1rem);
+    overflow-wrap: anywhere;
     border-right: 3px solid #222;
     text-align: center;
 }
@@ -60,15 +64,15 @@ header h1 {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 32px;
-    padding: 16px;
+    gap: clamp(12px, 3vw, 32px);
+    padding: clamp(8px, 2vw, 16px);
 }
 
 .workshop-logo {
     position: fixed;
-    right: 16px;
-    bottom: 16px;
-    width: 200px;
-    height: 250px;
+    right: clamp(8px, 1.5vw, 16px);
+    bottom: clamp(8px, 1.5vw, 16px);
+    width: clamp(70px, 15vw, 200px);
+    height: clamp(88px, 18.75vw, 250px);
     object-fit: contain;
 }
