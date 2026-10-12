@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Request a Quote | Car Workshop and Repair Services</title>
+<link rel="stylesheet" href="style.css">
+<style>
+/* Page-specific styles (style.css is used as-is) */
+.service[aria-current="page"] { background: #eaf2fd; font-weight: bold; color: #12306b; }
+.page-title { text-align: center; margin: 0 0 8px; font-size: 2rem; color: #12306b; }
+.page-intro { text-align: center; max-width: 600px; margin: 0 auto 28px; line-height: 1.6; color: #333; }
+.panel { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 2px 10px rgba(30, 110, 220, 0.15); }
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field.full { grid-column: 1 / -1; }
+.field label { font-weight: bold; color: #12306b; font-size: 0.95rem; }
+.field input,
+.field select,
+.field textarea {
+    font: inherit;
+    padding: 10px 12px;
+    border: 2px solid #c9d9f0;
+    border-radius: 8px;
+    background: #fff;
+    color: #111;
+    box-sizing: border-box;
+    width: 100%;
+}
+.field textarea { min-height: 110px; resize: vertical; }
+.field input:focus,
+.field select:focus,
+.field textarea:focus { outline: none; border-color: #1e6edc; box-shadow: 0 0 0 3px rgba(30, 110, 220, 0.2); }
+.field input:invalid:not(:placeholder-shown) { border-color: #c0392b; }
+button.btn { border: none; cursor: pointer; font: inherit; font-weight: bold; }
+button.btn-light { border: 2px solid #1e6edc; }
+.form-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
+.form-actions.center { justify-content: center; }
+.notice { display: none; margin-top: 20px; padding: 16px 20px; border-radius: 12px; background: #e3f6e8; color: #17653a; line-height: 1.5; }
+.notice.show { display: block; }
+</style>
+</head>
+<body>
+<header>
+    <h1>Car Workshop and Repair Services</h1>
+</header>
+<nav class="services" aria-label="Workshop services">
+    <a class="service" href="find-workshop.html">Find a Workshop</a>
+    <a class="service" href="maintenance.html">Maintenance &amp; Repair</a>
+    <a class="service" href="appointment.html">Book an Appointment</a>
+    <a class="service" href="quote.html" aria-current="page">Request a Quote</a>
+    <a class="service" href="track-vehicle.html">Track My Vehicle</a>
+    <a class="service" href="my-vehicle.html">My Vehicle</a>
+</nav>
+<main>
+  <h2 class="page-title">Request a Quote</h2>
+  <p class="page-intro">Tell us about your car and the service you need. The workshop will reply with a price and an estimated repair time.</p>
+
+  <form class="panel" id="quoteForm">
+    <div class="form-grid">
+      <div class="field">
+        <label for="name">Full name</label>
+        <input type="text" id="name" required placeholder=" " autocomplete="name">
+      </div>
+      <div class="field">
+        <label for="phone">Phone number</label>
+        <input type="tel" id="phone" required placeholder=" " autocomplete="tel" pattern="[0-9+\s-]{9,15}">
+      </div>
+
+      <div class="field">
+        <label for="make">Car make</label>
+        <input type="text" id="make" required placeholder="e.g. Toyota">
+      </div>
+      <div class="field">
+        <label for="model">Model</label>
+        <input type="text" id="model" required placeholder="e.g. Camry">
+      </div>
+      <div class="field">
+        <label for="year">Year</label>
+        <input type="number" id="year" required min="1990" max="2027" placeholder="e.g. 2019">
+      </div>
+
+      <div class="field">
+        <label for="service">Service needed</label>
+        <select id="service" required>
+          <option value="">Choose a service</option>
+          <option value="oil">Oil change</option>
+          <option value="brakes">Brake service</option>
+          <option value="tires">Tire replacement</option>
+          <option value="ac">A/C repair</option>
+          <option value="battery">Battery replacement</option>
+          <option value="inspection">General inspection</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="workshop">Workshop</label>
+        <select id="workshop" required>
+          <option value="">Choose a workshop</option>
+          <option>Al-Amal Auto Care</option>
+          <option>Red Sea Garage</option>
+          <option>Gulf Motors Service</option>
+          <option>Quick Fix Workshop</option>
+          <option>Al-Naeem Auto Center</option>
+        </select>
+      </div>
+
+      <div class="field full">
+        <label for="details">Describe the problem (optional)</label>
+        <textarea id="details" placeholder="For example: grinding noise when braking at low speed."></textarea>
+      </div>
+    </div>
+
+    <div class="form-actions center">
+      <button type="submit" class="btn">Send quote request</button>
+      <a class="btn btn-light" href="find-workshop.html">Compare workshops first</a>
+    </div>
+
+    <p class="notice" id="notice" role="status"></p>
+  </form>
+</main>
+<div class="workshop">
+    <img class="workshop-logo" src="kaulogo.png" alt="Workshop logo">
+</div>
+
+<script>
+/* Preselect workshop and service when arriving from "Find a Workshop". */
+const params = new URLSearchParams(location.search);
+const wsSelect = document.getElementById("workshop");
+const svcSelect = document.getElementById("service");
+if (params.get("workshop")) wsSelect.value = params.get("workshop");
+if (params.get("service"))  svcSelect.value = params.get("service");
+
+document.getElementById("quoteForm").addEventListener("submit", function (e) {
+  e.preventDefault();
+  /* Demo only: connect this to your backend to actually send the request. */
+  const notice = document.getElementById("notice");
+  const name = document.getElementById("name").value.trim();
+  notice.textContent = "Thank you, " + name + ". Your request was sent to " + wsSelect.value +
+                       ". They will contact you by phone with a price and repair time.";
+  notice.classList.add("show");
+  this.reset();
+  notice.scrollIntoView({ behavior: "smooth", block: "center" });
+});
+</script>
+</body>
+</html>
