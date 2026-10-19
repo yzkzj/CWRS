@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Find a Workshop | Car Workshop and Repair Services</title>
+<link rel="stylesheet" href="style.css">
+<style>
+/* Page-specific styles (style.css is used as-is) */
+.service[aria-current="page"] { background: #eaf2fd; font-weight: bold; color: #12306b; }
+.page-title { text-align: center; margin: 0 0 8px; font-size: 2rem; color: #12306b; }
+.page-intro { text-align: center; max-width: 600px; margin: 0 auto 28px; line-height: 1.6; color: #333; }
+.panel { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 2px 10px rgba(30, 110, 220, 0.15); }
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field.full { grid-column: 1 / -1; }
+.field label { font-weight: bold; color: #12306b; font-size: 0.95rem; }
+.field input,
+.field select,
+.field textarea {
+    font: inherit;
+    padding: 10px 12px;
+    border: 2px solid #c9d9f0;
+    border-radius: 8px;
+    background: #fff;
+    color: #111;
+    box-sizing: border-box;
+    width: 100%;
+}
+.field textarea { min-height: 110px; resize: vertical; }
+.field input:focus,
+.field select:focus,
+.field textarea:focus { outline: none; border-color: #1e6edc; box-shadow: 0 0 0 3px rgba(30, 110, 220, 0.2); }
+.check { flex-direction: row; align-items: center; gap: 8px; }
+.check input { width: auto; }
+.check label { font-weight: normal; color: #333; }
+.results-bar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin: 28px 0 12px; color: #12306b; font-weight: bold; }
+.workshop-list { display: grid; gap: 16px; }
+.w-card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 2px 10px rgba(30, 110, 220, 0.15); display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center; }
+.w-card h3 { margin: 0 0 4px; color: #12306b; }
+.w-meta { margin: 0 0 10px; color: #555; font-size: 0.95rem; }
+.w-stats { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.w-stats li { background: #eaf2fd; color: #12306b; border-radius: 999px; padding: 6px 12px; font-size: 0.9rem; }
+.w-stats li.ok { background: #e3f6e8; color: #17653a; }
+.w-stats li.no { background: #fdeaea; color: #8c2a20; }
+.w-actions { display: flex; flex-direction: column; gap: 8px; }
+.w-actions .btn { text-align: center; padding: 10px 18px; }
+.empty { text-align: center; padding: 32px 16px; background: #fff; border-radius: 12px; color: #444; }
+
+@media (max-width: 600px) {
+    .w-card { grid-template-columns: 1fr; }
+    .w-actions { flex-direction: row; }
+    .w-actions .btn { flex: 1; }
+}
+</style>
+</head>
+<body>
+<header>
+    <h1>Car Workshop and Repair Services</h1>
+</header>
+<nav class="services" aria-label="Workshop services">
+    <a class="service" href="find-workshop.html" aria-current="page">Find a Workshop</a>
+    <a class="service" href="maintenance.html">Maintenance &amp; Repair</a>
+    <a class="service" href="appointment.html">Book an Appointment</a>
+    <a class="service" href="quote.html">Request a Quote</a>
+    <a class="service" href="track-vehicle.html">Track My Vehicle</a>
+    <a class="service" href="my-vehicle.html">My Vehicle</a>
+</nav>
+<main>
+  <h2 class="page-title">Find a Workshop</h2>
+  <p class="page-intro">Choose the service you need and compare price, repair time and parts availability across workshops.</p>
+
+  <section class="panel">
+    <div class="form-grid">
+      <div class="field">
+        <label for="service">Service</label>
+        <select id="service">
+          <option value="oil">Oil change</option>
+          <option value="brakes">Brake service</option>
+          <option value="tires">Tire replacement</option>
+          <option value="ac">A/C repair</option>
+          <option value="battery">Battery replacement</option>
+          <option value="inspection">General inspection</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="area">Area</label>
+        <select id="area">
+          <option value="">All areas</option>
+          <option>Al-Rawdah</option>
+          <option>Al-Safa</option>
+          <option>Al-Hamra</option>
+          <option>Al-Salamah</option>
+          <option>Al-Naeem</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="sort">Sort by</label>
+        <select id="sort">
+          <option value="price">Lowest price</option>
+          <option value="time">Shortest repair time</option>
+          <option value="rating">Highest rating</option>
+        </select>
+      </div>
+      <div class="field check">
+        <input type="checkbox" id="partsOnly">
+        <label for="partsOnly">Only workshops with parts in stock</label>
+      </div>
+    </div>
+  </section>
+
+  <div class="results-bar">
+    <span id="count" aria-live="polite"></span>
+  </div>
+  <section class="workshop-list" id="list"></section>
+</main>
+<div class="workshop">
+    <img class="workshop-logo" src="kaulogo.png" alt="Workshop logo">
+</div>
+
+<script>
+/* Sample data. Replace with real data from your database / API. */
+const workshops = [
+  { name: "Al-Amal Auto Care",   area: "Al-Rawdah",  rating: 4.7, reviews: 182,
+    services: { oil:{price:120,hours:0.5,parts:true},  brakes:{price:350,hours:2,parts:true},  tires:{price:90,hours:1,parts:true},   ac:{price:420,hours:3,parts:false}, battery:{price:300,hours:0.5,parts:true}, inspection:{price:80,hours:1,parts:true} } },
+  { name: "Red Sea Garage",      area: "Al-Safa",    rating: 4.4, reviews: 96,
+    services: { oil:{price:100,hours:1,parts:true},    brakes:{price:320,hours:3,parts:false}, tires:{price:110,hours:1.5,parts:true},ac:{price:380,hours:4,parts:true},  battery:{price:280,hours:1,parts:true},   inspection:{price:70,hours:1.5,parts:true} } },
+  { name: "Gulf Motors Service", area: "Al-Hamra",   rating: 4.9, reviews: 240,
+    services: { oil:{price:150,hours:0.5,parts:true},  brakes:{price:400,hours:2,parts:true},  tires:{price:100,hours:1,parts:true},  ac:{price:450,hours:2.5,parts:true},battery:{price:330,hours:0.5,parts:true}, inspection:{price:95,hours:1,parts:true} } },
+  { name: "Quick Fix Workshop",  area: "Al-Salamah", rating: 4.1, reviews: 58,
+    services: { oil:{price:90,hours:0.75,parts:true},  brakes:{price:290,hours:3,parts:true},  tires:{price:85,hours:1,parts:false}, ac:{price:350,hours:5,parts:false}, battery:{price:260,hours:1,parts:false}, inspection:{price:60,hours:2,parts:true} } },
+  { name: "Al-Naeem Auto Center",area: "Al-Naeem",   rating: 4.5, reviews: 131,
+    services: { oil:{price:110,hours:1,parts:true},    brakes:{price:340,hours:2.5,parts:true},tires:{price:95,hours:1.25,parts:true},ac:{price:400,hours:3,parts:true},  battery:{price:290,hours:0.75,parts:true},inspection:{price:75,hours:1.25,parts:true} } }
+];
+
+const els = {
+  service: document.getElementById("service"),
+  area: document.getElementById("area"),
+  sort: document.getElementById("sort"),
+  partsOnly: document.getElementById("partsOnly"),
+  list: document.getElementById("list"),
+  count: document.getElementById("count")
+};
+
+function formatTime(h) {
+  if (h < 1) return Math.round(h * 60) + " min";
+  const whole = Math.floor(h), mins = Math.round((h - whole) * 60);
+  return whole + " h" + (mins ? " " + mins + " min" : "");
+}
+
+function render() {
+  const key = els.service.value;
+  const serviceLabel = els.service.options[els.service.selectedIndex].text;
+
+  let items = workshops
+    .map(w => ({ w, s: w.services[key] }))
+    .filter(x => !els.area.value || x.w.area === els.area.value)
+    .filter(x => !els.partsOnly.checked || x.s.parts);
+
+  const sorters = {
+    price:  (a, b) => a.s.price - b.s.price,
+    time:   (a, b) => a.s.hours - b.s.hours,
+    rating: (a, b) => b.w.rating - a.w.rating
+  };
+  items.sort(sorters[els.sort.value]);
+
+  els.count.textContent = items.length + (items.length === 1 ? " workshop" : " workshops") + " for " + serviceLabel;
+  els.list.innerHTML = "";
+
+  if (!items.length) {
+    const p = document.createElement("p");
+    p.className = "empty";
+    p.textContent = "No workshops match these filters. Try another area or turn off the parts filter.";
+    els.list.appendChild(p);
+    return;
+  }
+
+  items.forEach(({ w, s }) => {
+    const card = document.createElement("article");
+    card.className = "w-card";
+    const q = "quote.html?workshop=" + encodeURIComponent(w.name) + "&service=" + encodeURIComponent(key);
+    card.innerHTML =
+      '<div>' +
+        '<h3></h3>' +
+        '<p class="w-meta"></p>' +
+        '<ul class="w-stats">' +
+          '<li>Price: SAR ' + s.price + '</li>' +
+          '<li>Takes about ' + formatTime(s.hours) + '</li>' +
+          '<li class="' + (s.parts ? "ok" : "no") + '">' + (s.parts ? "Parts in stock" : "Parts must be ordered") + '</li>' +
+        '</ul>' +
+      '</div>' +
+      '<div class="w-actions">' +
+        '<a class="btn" href="' + q + '">Request a Quote</a>' +
+        '<a class="btn btn-light" href="appointment.html">Book</a>' +
+      '</div>';
+    card.querySelector("h3").textContent = w.name;
+    card.querySelector(".w-meta").textContent = w.area + " \u2022 Rated " + w.rating.toFixed(1) + " / 5 (" + w.reviews + " reviews)";
+    els.list.appendChild(card);
+  });
+}
+
+["service", "area", "sort", "partsOnly"].forEach(id => els[id].addEventListener("change", render));
+render();
+</script>
+</body>
+</html>
