@@ -13,16 +13,9 @@
 <nav class="site-nav" aria-label="Main navigation">
     <a class="site-link" href="index.html">Home</a>
     <a class="site-link" href="about.html">About Us</a>
+    <a class="site-link" href="services.html">Services</a>
     <a class="site-link" href="login.html">Login</a>
     <a class="site-link" href="signup.html">Sign Up</a>
-</nav>
-<nav class="services" aria-label="Workshop services">
-    <a class="service" href="find-workshop.html" aria-current="page">Find a Workshop</a>
-    <a class="service" href="maintenance.html">Maintenance &amp; Repair</a>
-    <a class="service" href="appointment.html">Book an Appointment</a>
-    <a class="service" href="Quote.html">Request a Quote</a>
-    <a class="service" href="track-vehicle.html">Track My Vehicle</a>
-    <a class="service" href="my-vehicle.html">My Vehicle</a>
 </nav>
 <main>
   <h2 class="page-title">Find a Workshop</h2>
@@ -151,7 +144,7 @@ function render() {
       '</div>' +
       '<div class="w-actions">' +
         '<a class="btn" href="' + q + '">Request a Quote</a>' +
-        '<a class="btn btn-light" href="appointment.html">Book</a>' +
+        '<a class="btn btn-light" href="services.html#appointments">Booking info</a>' +
       '</div>';
     card.querySelector("h3").textContent = w.name;
     card.querySelector(".w-meta").textContent = w.area + " \u2022 Rated " + w.rating.toFixed(1) + " / 5 (" + w.reviews + " reviews)";
