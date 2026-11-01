@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login | Car Workshop and Repair Services</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+    <h1>Car Workshop and Repair Services</h1>
+</header>
+<nav class="site-nav" aria-label="Main navigation">
+    <a class="site-link" href="index.html">Home</a>
+    <a class="site-link" href="about.html">About Us</a>
+    <a class="site-link" href="login.html" aria-current="page">Login</a>
+    <a class="site-link" href="signup.html">Sign Up</a>
+</nav>
+<main class="auth-main auth-split">
+  <aside class="auth-brand">
+    <img class="brand-logo" src="workshop-logo.svg" alt="CWRS car workshop services">
+    <p class="eyebrow">WELCOME BACK</p>
+    <h2>Good to see you again.</h2>
+    <p>Find workshop services and keep your car-care plans moving.</p>
+    <ul class="auth-highlights">
+      <li>Compare workshop options</li>
+      <li>Review service details</li>
+      <li>Request a quote when you're ready</li>
+    </ul>
+  </aside>
+  <section class="auth-card" aria-labelledby="login-title">
+    <p class="eyebrow">YOUR ACCOUNT</p>
+    <h2 class="page-title" id="login-title">Login</h2>
+    <p class="page-intro">Enter your details to continue.</p>
+    <form id="loginForm">
+      <div class="field">
+        <label for="email">Email address</label>
+        <input type="email" id="email" name="email" required autocomplete="email">
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required autocomplete="current-password">
+      </div>
+      <button class="btn auth-submit" type="submit">Login</button>
+      <p class="form-notice" id="loginNotice" role="status" aria-live="polite"></p>
+    </form>
+    <p class="auth-switch">New here? <a href="signup.html">Create an account</a></p>
+    <p class="demo-note">Demo only: login is not connected to an account service, and your details are not sent or saved.</p>
+  </section>
+</main>
+<script>
+document.getElementById("loginForm").addEventListener("submit", function (event) {
+  event.preventDefault();
+  document.getElementById("loginNotice").textContent =
+    "This demo does not sign you in. Connect an authentication service to enable login.";
+});
+</script>
+</body>
+</html>
