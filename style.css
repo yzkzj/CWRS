@@ -324,11 +324,12 @@ button.btn-light { border: 2px solid #1e6edc; }
 }
 
 .auth-brand .brand-logo {
-    width: min(100%, 300px);
+    box-sizing: border-box;
+    width: min(100%, 240px);
     height: auto;
-    margin: 0 0 44px;
-    padding: 10px;
-    border-radius: 10px;
+    margin: 0 0 32px;
+    padding: 8px;
+    border-radius: 8px;
     background: #fff;
 }
 
