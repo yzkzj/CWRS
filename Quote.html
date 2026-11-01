@@ -22,7 +22,8 @@
     <span aria-hidden="true">&larr;</span> Back to Services
   </a>
   <h2 class="page-title">Request a Quote</h2>
-  <p class="page-intro">Tell us about your car and the service you need. The workshop will reply with a price and an estimated repair time.</p>
+  <p class="page-intro">Tell us about your car and the service you need to prepare a quote request.</p>
+  <p class="demo-note">Demo only: quote requests are not sent or saved.</p>
 
   <form class="panel" id="quoteForm">
     <div class="form-grid">
@@ -32,7 +33,7 @@
       </div>
       <div class="field">
         <label for="phone">Phone number</label>
-        <input type="tel" id="phone" required placeholder=" " autocomplete="tel" pattern="[0-9+\s-]{9,15}">
+        <input type="tel" id="phone" required placeholder=" " autocomplete="tel" pattern="[0-9+\s\-]{9,15}">
       </div>
 
       <div class="field">
@@ -80,7 +81,7 @@
     </div>
 
     <div class="form-actions center">
-      <button type="submit" class="btn">Send quote request</button>
+      <button type="submit" class="btn">Preview quote request</button>
       <a class="btn btn-light" href="find-workshop.html">Compare workshops first</a>
     </div>
 
@@ -103,13 +104,10 @@ if (params.get("service"))  svcSelect.value = params.get("service");
 
 document.getElementById("quoteForm").addEventListener("submit", function (e) {
   e.preventDefault();
-  /* Demo only: connect this to your backend to actually send the request. */
   const notice = document.getElementById("notice");
   const name = document.getElementById("name").value.trim();
-  notice.textContent = "Thank you, " + name + ". Your request was sent to " + wsSelect.value +
-                       ". They will contact you by phone with a price and repair time.";
+  notice.textContent = "Thank you, " + name + ". This is only a preview; no request was sent or saved.";
   notice.classList.add("show");
-  this.reset();
   notice.scrollIntoView({ behavior: "smooth", block: "center" });
 });
 </script>
