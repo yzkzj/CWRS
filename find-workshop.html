@@ -130,7 +130,7 @@ function render() {
   items.forEach(({ w, s }) => {
     const card = document.createElement("article");
     card.className = "w-card";
-    const q = "quote.html?workshop=" + encodeURIComponent(w.name) + "&service=" + encodeURIComponent(key);
+    const q = "Quote.html?workshop=" + encodeURIComponent(w.name) + "&service=" + encodeURIComponent(key);
     card.innerHTML =
       '<div>' +
         '<h3></h3>' +

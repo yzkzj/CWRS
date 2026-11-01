@@ -10,17 +10,6 @@ body {
         linear-gradient(#f2f7fd, #f2f7fd);
     background-size: 140% 140%;
     background-repeat: no-repeat;
-    background-attachment: fixed;
-    animation: drift 20s ease-in-out infinite alternate;
-}
-
-@keyframes drift {
-    from { background-position: 0% 0%, 100% 0%, 50% 100%, 0 0; }
-    to   { background-position: 100% 60%, 0% 80%, 40% 0%, 0 0; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    body { animation: none; }
 }
 
 nav {
