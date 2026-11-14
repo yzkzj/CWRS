@@ -70,6 +70,14 @@
   <div class="results-bar">
     <span id="count" aria-live="polite"></span>
   </div>
+  <section class="panel comparison-panel" id="comparisonPanel" aria-labelledby="comparisonTitle" hidden>
+    <div class="comparison-heading">
+      <h3 id="comparisonTitle">Workshop comparison</h3>
+      <button class="btn btn-light" id="clearComparison" type="button">Clear selection</button>
+    </div>
+    <p class="comparison-status" id="comparisonStatus" aria-live="polite"></p>
+    <div class="comparison-table-wrap" id="comparisonTable"></div>
+  </section>
   <section class="workshop-list" id="list"></section>
 </main>
 <div class="workshop">
@@ -93,6 +101,8 @@ const workshops = [
     services: { oil:{price:110,hours:1,parts:true},    brakes:{price:340,hours:2.5,parts:true},tires:{price:95,hours:1.25,parts:true},ac:{price:400,hours:3,parts:true},  battery:{price:290,hours:0.75,parts:true},inspection:{price:75,hours:1.25,parts:true} } }
 ];
 
+const selectedWorkshopNames = new Set();
+
 const els = {
   service: document.getElementById("service"),
   area: document.getElementById("area"),
@@ -100,7 +110,11 @@ const els = {
   partsOnly: document.getElementById("partsOnly"),
   search: document.getElementById("search"),
   list: document.getElementById("list"),
-  count: document.getElementById("count")
+  count: document.getElementById("count"),
+  comparisonPanel: document.getElementById("comparisonPanel"),
+  comparisonStatus: document.getElementById("comparisonStatus"),
+  comparisonTable: document.getElementById("comparisonTable"),
+  clearComparison: document.getElementById("clearComparison")
 };
 
 function formatTime(h) {
@@ -128,6 +142,66 @@ function getPartsAvailability(hasParts) {
   };
 }
 
+function updateComparison(serviceKey, serviceLabel) {
+  const selected = workshops.filter(w => selectedWorkshopNames.has(w.name));
+  els.comparisonPanel.hidden = selected.length === 0;
+  els.comparisonTable.innerHTML = "";
+
+  if (!selected.length) return;
+
+  els.comparisonStatus.textContent = selected.length === 1
+    ? "1 of 2 workshops selected. Choose one more to compare."
+    : "2 of 2 workshops selected.";
+
+  const table = document.createElement("table");
+  table.className = "comparison-table";
+  const caption = document.createElement("caption");
+  caption.textContent = serviceLabel;
+  table.appendChild(caption);
+
+  const head = document.createElement("thead");
+  const headerRow = document.createElement("tr");
+  const detailHeader = document.createElement("th");
+  detailHeader.scope = "col";
+  detailHeader.textContent = "Details";
+  headerRow.appendChild(detailHeader);
+
+  selected.forEach(w => {
+    const header = document.createElement("th");
+    header.scope = "col";
+    header.textContent = w.name;
+    headerRow.appendChild(header);
+  });
+  head.appendChild(headerRow);
+  table.appendChild(head);
+
+  const rows = [
+    { label: "Price", value: w => formatPrice(w.services[serviceKey].price) },
+    { label: "Repair time", value: w => formatTime(w.services[serviceKey].hours) },
+    { label: "Rating", value: w => formatRating(w.rating, w.reviews) },
+    { label: "Parts", value: w => getPartsAvailability(w.services[serviceKey].parts).label }
+  ];
+  const body = document.createElement("tbody");
+
+  rows.forEach(rowData => {
+    const row = document.createElement("tr");
+    const label = document.createElement("th");
+    label.scope = "row";
+    label.textContent = rowData.label;
+    row.appendChild(label);
+
+    selected.forEach(w => {
+      const cell = document.createElement("td");
+      cell.textContent = rowData.value(w);
+      row.appendChild(cell);
+    });
+    body.appendChild(row);
+  });
+
+  table.appendChild(body);
+  els.comparisonTable.appendChild(table);
+}
+
 function render() {
   const key = els.service.value;
   const serviceLabel = els.service.options[els.service.selectedIndex].text;
@@ -149,6 +223,7 @@ function render() {
   items.sort(sorters[els.sort.value]);
 
   els.count.textContent = formatWorkshopCount(items.length, serviceLabel);
+  updateComparison(key, serviceLabel);
   els.list.innerHTML = "";
 
   if (!items.length) {
@@ -177,15 +252,36 @@ function render() {
       '<div class="w-actions">' +
         '<a class="btn" href="' + q + '">Request a Quote</a>' +
         '<a class="btn btn-light" href="services.html#appointments">Booking info</a>' +
+        '<button class="btn btn-light compare-toggle" type="button"></button>' +
       '</div>';
     card.querySelector("h3").textContent = w.name;
     card.querySelector(".w-meta").textContent = w.area + " \u2022 " + formatRating(w.rating, w.reviews);
+    const compareButton = card.querySelector(".compare-toggle");
+    const isSelected = selectedWorkshopNames.has(w.name);
+    card.classList.toggle("selected", isSelected);
+    compareButton.textContent = isSelected ? "Remove" : "Compare";
+    compareButton.setAttribute("aria-pressed", String(isSelected));
+    compareButton.setAttribute("aria-label",
+      (isSelected ? "Remove " + w.name + " from" : "Add " + w.name + " to") + " comparison");
+    compareButton.disabled = selectedWorkshopNames.size === 2 && !isSelected;
+    compareButton.addEventListener("click", function () {
+      if (selectedWorkshopNames.has(w.name)) {
+        selectedWorkshopNames.delete(w.name);
+      } else if (selectedWorkshopNames.size < 2) {
+        selectedWorkshopNames.add(w.name);
+      }
+      render();
+    });
     els.list.appendChild(card);
   });
 }
 
 ["service", "area", "sort", "partsOnly"].forEach(id => els[id].addEventListener("change", render));
 els.search.addEventListener("input", render);
+els.clearComparison.addEventListener("click", function () {
+  selectedWorkshopNames.clear();
+  render();
+});
 render();
 </script>
 </body>
