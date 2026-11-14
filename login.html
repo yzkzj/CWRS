@@ -34,7 +34,7 @@
   <section class="auth-card" aria-labelledby="login-title">
     <h2 class="page-title" id="login-title">Login</h2>
     <p class="page-intro">Enter your details to continue.</p>
-    <form id="loginForm">
+    <form id="loginForm" novalidate>
       <div class="field">
         <label for="email">Email address</label>
         <input type="email" id="email" name="email" required autocomplete="email">
@@ -50,12 +50,26 @@
     <p class="demo-note">Demo only: login is not connected to an account service, and your details are not sent or saved.</p>
   </section>
 </main>
+<script src="validation.js"></script>
 <script>
-document.getElementById("loginForm").addEventListener("submit", function (event) {
+function handleLogin(event) {
   event.preventDefault();
-  document.getElementById("loginNotice").textContent =
+  const email = document.getElementById("email");
+  const password = document.getElementById("password");
+  const notice = document.getElementById("loginNotice");
+
+  const emailOk = validateEmail(email);
+  const passwordOk = validateRequired(password, "Password");
+
+  if (!emailOk || !passwordOk) {
+    notice.textContent = "Please fix the highlighted fields.";
+    return;
+  }
+  notice.textContent =
     "This demo does not sign you in. Connect an authentication service to enable login.";
-});
+}
+
+document.getElementById("loginForm").addEventListener("submit", handleLogin);
 </script>
 </body>
 </html>

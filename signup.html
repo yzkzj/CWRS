@@ -34,7 +34,7 @@
   <section class="auth-card" aria-labelledby="signup-title">
     <h2 class="page-title" id="signup-title">Sign up</h2>
     <p class="page-intro">It only takes a moment to get started.</p>
-    <form id="signupForm">
+    <form id="signupForm" novalidate>
       <div class="field">
         <label for="name">Full name</label>
         <input type="text" id="name" name="name" required autocomplete="name">
@@ -59,26 +59,36 @@
     <p class="demo-note">Demo only: no account is created, and your details are not sent or saved.</p>
   </section>
 </main>
+<script src="validation.js"></script>
 <script>
 const signupForm = document.getElementById("signupForm");
+const nameInput = document.getElementById("name");
+const emailInput = document.getElementById("email");
 const password = document.getElementById("password");
 const confirmPassword = document.getElementById("confirm-password");
 const signupNotice = document.getElementById("signupNotice");
 
-function validatePasswordMatch() {
-  confirmPassword.setCustomValidity(
-    confirmPassword.value && confirmPassword.value !== password.value
-      ? "Passwords do not match."
-      : ""
-  );
-}
-
-password.addEventListener("input", validatePasswordMatch);
-confirmPassword.addEventListener("input", validatePasswordMatch);
-signupForm.addEventListener("submit", function (event) {
+function handleSignup(event) {
   event.preventDefault();
+
+  const results = [
+    validateName(nameInput),
+    validateEmail(emailInput),
+    validatePassword(password),
+    validateConfirmPassword(password, confirmPassword)
+  ];
+
+  if (results.includes(false)) {
+    signupNotice.textContent = "Please fix the highlighted fields.";
+    return;
+  }
   signupNotice.textContent =
     "This demo does not create accounts. Connect an authentication service to enable sign up.";
+}
+
+signupForm.addEventListener("submit", handleSignup);
+confirmPassword.addEventListener("blur", function () {
+  if (confirmPassword.value !== "") validateConfirmPassword(password, confirmPassword);
 });
 </script>
 </body>
