@@ -87,6 +87,9 @@ function handleSignup(event) {
 }
 
 signupForm.addEventListener("submit", handleSignup);
+password.addEventListener("input", function () {
+  if (confirmPassword.value !== "") validateConfirmPassword(password, confirmPassword);
+});
 confirmPassword.addEventListener("blur", function () {
   if (confirmPassword.value !== "") validateConfirmPassword(password, confirmPassword);
 });
