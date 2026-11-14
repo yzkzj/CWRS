@@ -104,6 +104,25 @@ function formatTime(h) {
   return whole + " h" + (mins ? " " + mins + " min" : "");
 }
 
+function formatPrice(price) {
+  return "SAR " + price;
+}
+
+function formatRating(rating, reviews) {
+  return "Rated " + rating.toFixed(1) + " / 5 (" + reviews + " reviews)";
+}
+
+function formatWorkshopCount(count, serviceLabel) {
+  return count + (count === 1 ? " workshop" : " workshops") + " for " + serviceLabel;
+}
+
+function getPartsAvailability(hasParts) {
+  return {
+    className: hasParts ? "ok" : "no",
+    label: hasParts ? "Parts in stock" : "Parts must be ordered"
+  };
+}
+
 function render() {
   const key = els.service.value;
   const serviceLabel = els.service.options[els.service.selectedIndex].text;
@@ -120,7 +139,7 @@ function render() {
   };
   items.sort(sorters[els.sort.value]);
 
-  els.count.textContent = items.length + (items.length === 1 ? " workshop" : " workshops") + " for " + serviceLabel;
+  els.count.textContent = formatWorkshopCount(items.length, serviceLabel);
   els.list.innerHTML = "";
 
   if (!items.length) {
@@ -135,14 +154,15 @@ function render() {
     const card = document.createElement("article");
     card.className = "w-card";
     const q = "Quote.html?workshop=" + encodeURIComponent(w.name) + "&service=" + encodeURIComponent(key);
+    const parts = getPartsAvailability(s.parts);
     card.innerHTML =
       '<div>' +
         '<h3></h3>' +
         '<p class="w-meta"></p>' +
         '<ul class="w-stats">' +
-          '<li>Price: SAR ' + s.price + '</li>' +
+          '<li>Price: ' + formatPrice(s.price) + '</li>' +
           '<li>Takes about ' + formatTime(s.hours) + '</li>' +
-          '<li class="' + (s.parts ? "ok" : "no") + '">' + (s.parts ? "Parts in stock" : "Parts must be ordered") + '</li>' +
+          '<li class="' + parts.className + '">' + parts.label + '</li>' +
         '</ul>' +
       '</div>' +
       '<div class="w-actions">' +
@@ -150,7 +170,7 @@ function render() {
         '<a class="btn btn-light" href="services.html#appointments">Booking info</a>' +
       '</div>';
     card.querySelector("h3").textContent = w.name;
-    card.querySelector(".w-meta").textContent = w.area + " \u2022 Rated " + w.rating.toFixed(1) + " / 5 (" + w.reviews + " reviews)";
+    card.querySelector(".w-meta").textContent = w.area + " \u2022 " + formatRating(w.rating, w.reviews);
     els.list.appendChild(card);
   });
 }
