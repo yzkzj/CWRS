@@ -25,7 +25,7 @@
   <p class="page-intro">Tell us about your car and the service you need to prepare a quote request.</p>
   <p class="demo-note">Demo only: quote requests are not sent or saved.</p>
 
-  <form class="panel" id="quoteForm">
+  <form class="panel" id="quoteForm" novalidate>
     <div class="form-grid">
       <div class="field">
         <label for="name">Full name</label>
@@ -94,6 +94,7 @@
     </a>
 </div>
 
+<script src="validation.js"></script>
 <script>
 /* Preselect workshop and service when arriving from "Find a Workshop". */
 const params = new URLSearchParams(location.search);
@@ -102,14 +103,33 @@ const svcSelect = document.getElementById("service");
 if (params.get("workshop")) wsSelect.value = params.get("workshop");
 if (params.get("service"))  svcSelect.value = params.get("service");
 
-document.getElementById("quoteForm").addEventListener("submit", function (e) {
-  e.preventDefault();
+function handleQuoteSubmit(event) {
+  event.preventDefault();
   const notice = document.getElementById("notice");
+
+  const results = [
+    validateName(document.getElementById("name")),
+    validatePhone(document.getElementById("phone")),
+    validateRequired(document.getElementById("make"), "Car make"),
+    validateRequired(document.getElementById("model"), "Model"),
+    validateYear(document.getElementById("year")),
+    validateSelect(svcSelect, "a service"),
+    validateSelect(wsSelect, "a workshop")
+  ];
+
+  if (results.includes(false)) {
+    notice.classList.remove("show");
+    document.querySelector(".input-error").focus();
+    return;
+  }
+
   const name = document.getElementById("name").value.trim();
   notice.textContent = "Thank you, " + name + ". This is only a preview; no request was sent or saved.";
   notice.classList.add("show");
   notice.scrollIntoView({ behavior: "smooth", block: "center" });
-});
+}
+
+document.getElementById("quoteForm").addEventListener("submit", handleQuoteSubmit);
 </script>
 </body>
 </html>
