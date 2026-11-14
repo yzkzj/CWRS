@@ -26,6 +26,10 @@
 
   <section class="panel">
     <div class="form-grid">
+      <div class="field full">
+        <label for="search">Workshop name or area</label>
+        <input id="search" type="search" placeholder="e.g. Quick Fix or Al-Safa" autocomplete="off">
+      </div>
       <div class="field">
         <label for="service">Service</label>
         <select id="service">
@@ -94,6 +98,7 @@ const els = {
   area: document.getElementById("area"),
   sort: document.getElementById("sort"),
   partsOnly: document.getElementById("partsOnly"),
+  search: document.getElementById("search"),
   list: document.getElementById("list"),
   count: document.getElementById("count")
 };
@@ -126,9 +131,13 @@ function getPartsAvailability(hasParts) {
 function render() {
   const key = els.service.value;
   const serviceLabel = els.service.options[els.service.selectedIndex].text;
+  const searchTerm = els.search.value.trim().toLowerCase();
 
   let items = workshops
     .map(w => ({ w, s: w.services[key] }))
+    .filter(x => !searchTerm ||
+      x.w.name.toLowerCase().includes(searchTerm) ||
+      x.w.area.toLowerCase().includes(searchTerm))
     .filter(x => !els.area.value || x.w.area === els.area.value)
     .filter(x => !els.partsOnly.checked || x.s.parts);
 
@@ -145,7 +154,7 @@ function render() {
   if (!items.length) {
     const p = document.createElement("p");
     p.className = "empty";
-    p.textContent = "No workshops match these filters. Try another area or turn off the parts filter.";
+    p.textContent = "No workshops match these filters. Try another name, area or filter setting.";
     els.list.appendChild(p);
     return;
   }
@@ -176,6 +185,7 @@ function render() {
 }
 
 ["service", "area", "sort", "partsOnly"].forEach(id => els[id].addEventListener("change", render));
+els.search.addEventListener("input", render);
 render();
 </script>
 </body>
