@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book an Appointment | Car Workshop and Repair Services</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+    <h1>Car Workshop and Repair Services</h1>
+</header>
+<nav class="site-nav" aria-label="Main navigation">
+    <a class="site-link" href="index.html">Home</a>
+    <a class="site-link" href="about.html">About Us</a>
+    <a class="site-link" href="services.html">Services</a>
+    <a class="site-link" href="login.html">Login</a>
+    <a class="site-link" href="signup.html">Sign Up</a>
+</nav>
+<main>
+  <a class="back-link" href="services.html">
+    <span aria-hidden="true">&larr;</span> Back to Services
+  </a>
+  <h2 class="page-title">Book an Appointment</h2>
+  <p class="page-intro">Choose a workshop, pick a date and an available time slot, and reserve your visit.</p>
+  <p class="demo-note">Demo only: appointments are not sent or saved. Workshops are closed on Fridays.</p>
+
+  <form class="panel" id="appointmentForm" novalidate>
+    <div class="form-grid">
+      <div class="field">
+        <label for="name">Full name</label>
+        <input type="text" id="name" autocomplete="name">
+      </div>
+      <div class="field">
+        <label for="phone">Phone number</label>
+        <input type="tel" id="phone" autocomplete="tel" placeholder="e.g. 0501234567">
+      </div>
+
+      <div class="field">
+        <label for="make">Car make</label>
+        <input type="text" id="make" placeholder="e.g. Toyota">
+      </div>
+      <div class="field">
+        <label for="model">Model</label>
+        <input type="text" id="model" placeholder="e.g. Camry">
+      </div>
+      <div class="field">
+        <label for="year">Year</label>
+        <input type="number" id="year" placeholder="e.g. 2019">
+      </div>
+
+      <div class="field">
+        <label for="service">Service needed</label>
+        <select id="service">
+          <option value="">Choose a service</option>
+          <option value="oil">Oil change</option>
+          <option value="brakes">Brake service</option>
+          <option value="tires">Tire replacement</option>
+          <option value="ac">A/C repair</option>
+          <option value="battery">Battery replacement</option>
+          <option value="inspection">General inspection</option>
+        </select>
+        <small class="field-hint" id="durationHint"></small>
+      </div>
+      <div class="field">
+        <label for="workshop">Workshop</label>
+        <select id="workshop">
+          <option value="">Choose a workshop</option>
+          <option>Al-Amal Auto Care</option>
+          <option>Red Sea Garage</option>
+          <option>Gulf Motors Service</option>
+          <option>Quick Fix Workshop</option>
+          <option>Al-Naeem Auto Center</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="date">Preferred date</label>
+        <input type="date" id="date">
+      </div>
+      <div class="field">
+        <label for="time">Time slot</label>
+        <select id="time" disabled>
+          <option value="">Choose a time</option>
+        </select>
+        <small class="field-hint" id="slotHint">Select a workshop and a date to see available times.</small>
+      </div>
+
+      <div class="field full">
+        <label for="details">Notes (optional)</label>
+        <textarea id="details" placeholder="For example: please check the brakes too."></textarea>
+      </div>
+    </div>
+
+    <div class="form-actions center">
+      <button type="submit" class="btn">Confirm appointment</button>
+      <button type="reset" class="btn btn-light" id="resetBtn">Clear form</button>
+    </div>
+
+    <div class="notice" id="summary" role="status" aria-live="polite"></div>
+  </form>
+</main>
+<div class="workshop">
+    <a href="about.html" aria-label="About Us">
+      <img class="workshop-logo" src="cwrs-brand.png" alt="CWRS car workshop services">
+    </a>
+</div>
+
+<script src="validation.js"></script>
+<script>
+/* ===== Data ===== */
+const SERVICE_NAMES = {
+  oil: "Oil change", brakes: "Brake service", tires: "Tire replacement",
+  ac: "A/C repair", battery: "Battery replacement", inspection: "General inspection"
+};
+const SERVICE_HOURS = { oil: 0.5, brakes: 2, tires: 1, ac: 3, battery: 0.5, inspection: 1 };
+const SLOT_HOURS = [8, 9, 10, 11, 13, 14, 15, 16];   /* 12:00 is break time */
+const MAX_DAYS_AHEAD = 60;
+
+/* ===== Elements ===== */
+const form = document.getElementById("appointmentForm");
+const serviceSel = document.getElementById("service");
+const workshopSel = document.getElementById("workshop");
+const dateInput = document.getElementById("date");
+const timeSel = document.getElementById("time");
+const slotHint = document.getElementById("slotHint");
+const durationHint = document.getElementById("durationHint");
+const summary = document.getElementById("summary");
+
+/* ===== Helper functions ===== */
+function pad(n) {
+  return String(n).padStart(2, "0");
+}
+
+function toISODate(d) {
+  return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+}
+
+function parseDate(iso) {
+  return new Date(iso + "T00:00:00");
+}
+
+function isFriday(iso) {
+  return parseDate(iso).getDay() === 5;
+}
+
+function formatHour(h) {
+  const suffix = h >= 12 ? "PM" : "AM";
+  const hour12 = h > 12 ? h - 12 : h;
+  return hour12 + ":00 " + suffix;
+}
+
+function formatDuration(h) {
+  if (h < 1) return Math.round(h * 60) + " min";
+  const whole = Math.floor(h), mins = Math.round((h - whole) * 60);
+  return whole + " h" + (mins ? " " + mins + " min" : "");
+}
+
+/* Simulated bookings: the same workshop/date/hour always gives the same result */
+function isSlotBooked(workshop, iso, hour) {
+  const key = workshop + iso + hour;
+  let h = 0;
+  for (let i = 0; i < key.length; i++) {
+    h = (h * 31 + key.charCodeAt(i)) % 97;
+  }
+  return h % 4 === 0;
+}
+
+function generateReference() {
+  return "CWRS-" + Math.floor(100000 + Math.random() * 900000);
+}
+
+/* ===== Dynamic elements ===== */
+function setDateLimits() {
+  const today = new Date();
+  const max = new Date();
+  max.setDate(today.getDate() + MAX_DAYS_AHEAD);
+  dateInput.min = toISODate(today);
+  dateInput.max = toISODate(max);
+}
+
+function updateDuration() {
+  const key = serviceSel.value;
+  durationHint.textContent = key
+    ? "Estimated duration: " + formatDuration(SERVICE_HOURS[key])
+    : "";
+}
+
+function updateSlots() {
+  timeSel.innerHTML = "";
+  timeSel.appendChild(new Option("Choose a time", ""));
+
+  const dateVal = dateInput.value;
+  if (!workshopSel.value || !dateVal) {
+    timeSel.disabled = true;
+    slotHint.textContent = "Select a workshop and a date to see available times.";
+    return;
+  }
+  if (isFriday(dateVal)) {
+    timeSel.disabled = true;
+    slotHint.textContent = "Workshops are closed on Fridays. Please choose another date.";
+    return;
+  }
+
+  const now = new Date();
+  let available = 0;
+  SLOT_HOURS.forEach(function (hour) {
+    const slotStart = new Date(dateVal + "T" + pad(hour) + ":00:00");
+    if (slotStart <= now) return;                       /* skip times that passed */
+    const booked = isSlotBooked(workshopSel.value, dateVal, hour);
+    const option = new Option(formatHour(hour) + (booked ? " (Booked)" : ""), String(hour));
+    option.disabled = booked;
+    if (!booked) available++;
+    timeSel.appendChild(option);
+  });
+
+  timeSel.disabled = available === 0;
+  slotHint.textContent = available > 0
+    ? available + (available === 1 ? " slot" : " slots") + " available on this date."
+    : "No slots left on this date. Please choose another day.";
+}
+
+/* ===== Validation (uses functions from validation.js) ===== */
+function validateDate(input) {
+  const value = input.value;
+  if (value === "") {
+    showError(input, "Please choose a date.");
+    return false;
+  }
+  const chosen = parseDate(value);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const max = new Date(today);
+  max.setDate(today.getDate() + MAX_DAYS_AHEAD);
+
+  if (isNaN(chosen.getTime()) || chosen < today) {
+    showError(input, "The date cannot be in the past.");
+    return false;
+  }
+  if (chosen > max) {
+    showError(input, "Bookings open up to " + MAX_DAYS_AHEAD + " days ahead.");
+    return false;
+  }
+  if (isFriday(value)) {
+    showError(input, "Workshops are closed on Fridays.");
+    return false;
+  }
+  clearError(input);
+  return true;
+}
+
+function validateTime(select) {
+  if (select.disabled || select.value === "") {
+    showError(select, "Please choose an available time slot.");
+    return false;
+  }
+  clearError(select);
+  return true;
+}
+
+/* ===== Confirmation ===== */
+function showSummary(details) {
+  summary.innerHTML = "";
+
+  const title = document.createElement("strong");
+  title.textContent = "Appointment preview for " + details.name;
+  summary.appendChild(title);
+
+  const list = document.createElement("ul");
+  [
+    "Reference: " + details.ref,
+    "Workshop: " + details.workshop,
+    "Service: " + details.service + " (about " + details.duration + ")",
+    "Date: " + details.date + " at " + details.time,
+    "Vehicle: " + details.car
+  ].forEach(function (text) {
+    const li = document.createElement("li");
+    li.textContent = text;
+    list.appendChild(li);
+  });
+  summary.appendChild(list);
+
+  const note = document.createElement("p");
+  note.textContent = "This is only a preview; no appointment was sent or saved.";
+  summary.appendChild(note);
+
+  summary.classList.add("show");
+  summary.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+function handleSubmit(event) {
+  event.preventDefault();
+
+  const results = [
+    validateName(document.getElementById("name")),
+    validatePhone(document.getElementById("phone")),
+    validateRequired(document.getElementById("make"), "Car make"),
+    validateRequired(document.getElementById("model"), "Model"),
+    validateYear(document.getElementById("year")),
+    validateSelect(serviceSel, "a service"),
+    validateSelect(workshopSel, "a workshop"),
+    validateDate(dateInput),
+    validateTime(timeSel)
+  ];
+
+  if (results.includes(false)) {
+    summary.classList.remove("show");
+    const firstError = document.querySelector(".input-error");
+    if (firstError) firstError.focus();
+    return;
+  }
+
+  showSummary({
+    name: document.getElementById("name").value.trim(),
+    ref: generateReference(),
+    workshop: workshopSel.value,
+    service: SERVICE_NAMES[serviceSel.value],
+    duration: formatDuration(SERVICE_HOURS[serviceSel.value]),
+    date: dateInput.value,
+    time: formatHour(Number(timeSel.value)),
+    car: document.getElementById("make").value.trim() + " " +
+         document.getElementById("model").value.trim() + " " +
+         document.getElementById("year").value
+  });
+}
+
+/* ===== Events ===== */
+setDateLimits();
+
+/* Preselect workshop and service when arriving from "Find a Workshop". */
+const params = new URLSearchParams(location.search);
+if (params.get("workshop")) workshopSel.value = params.get("workshop");
+if (params.get("service")) serviceSel.value = params.get("service");
+updateDuration();
+
+serviceSel.addEventListener("change", updateDuration);
+workshopSel.addEventListener("change", updateSlots);
+dateInput.addEventListener("change", function () {
+  updateSlots();
+  validateDate(dateInput);
+});
+form.addEventListener("submit", handleSubmit);
+form.addEventListener("reset", function () {
+  summary.classList.remove("show");
+  setTimeout(function () {          /* wait for the browser to clear the fields */
+    form.querySelectorAll(".input-error").forEach(clearError);
+    updateDuration();
+    updateSlots();
+  }, 0);
+});
+</script>
+</body>
+</html>
